@@ -1,0 +1,14 @@
+{
+    "name": "Moodle Checker",
+    "description": "Check your Moodle course pages for updates.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": ["storage", "tabs", "scripting"],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background":{
+        "service_worker": "background.js"
+    },
+    "host_permissions": [ "<all_urls>" ]
+}
