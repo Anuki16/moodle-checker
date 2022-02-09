@@ -6,7 +6,14 @@ function randint(min, max) {
 function tab_loaded(tab_id) {
     return new Promise((resolve, reject) => {
         const on_updated = (id, info) => {
-            if (id == tab_id && info.status === "complete") resolve();
+            if (id == tab_id && info.status === "complete") {
+                chrome.tabs.get(id, (tab) => {
+                    if (!tab.url.includes("login")) {
+                        chrome.tabs.onUpdated.removeListener(on_updated);
+                         resolve();
+                    }
+                });
+            }
         }
         chrome.tabs.onUpdated.addListener(on_updated);
     });
@@ -87,17 +94,22 @@ function compare_contents(prev, cur, course) {
         }
     }
     let drop = randint(0, cur.length);
-    cur.splice(drop, 1);
+    cur.splice(drop, Math.round(Math.random()));
     chrome.storage.local.set({[course.id]: cur});
+
+    if (!change) return;
     chrome.storage.local.get("changes", (result) => {
         if (result.changes) {
+            if (!result.changes[course.id] || !result.changes[course.id][1]) {
+                notifs += 1
+                update_badge(); 
+            }
             result.changes[course.id] = [course.name, change];
         } else {
             result.changes = {[course.id]: [course.name, change]};
         }
         chrome.storage.local.set({changes: result.changes});
     });
-    console.log("Saved contents");
 }
 
 async function check_course(tab, course, resolve) {
@@ -120,7 +132,7 @@ async function check_for_updates(tab) {
     console.log(`I am at ${tab.id}`);
 
     chrome.storage.local.get("courses", async (result) => {
-        for (course of result.courses.slice(0,5)){
+        for (course of result.courses){
             console.log(course.id, course.name);
             let wait_for_update = new Promise((resolve, reject) => {
                 chrome.tabs.update(tab.id, {url: `https://online.uom.lk/course/view.php?id=${course.id}`},
@@ -129,9 +141,37 @@ async function check_for_updates(tab) {
             await wait_for_update;
             console.log("done");
         }
+        chrome.tabs.remove(tab.id);
     });
 }
 
+function delete_course_change(id) {
+    chrome.storage.local.get("changes", (result) => {
+        result.changes[id][1] = "";
+        chrome.storage.local.set({changes: result.changes});
+    });
+    notifs -= 1
+    update_badge();
+}
+
+function update_badge() {
+    if (notifs == 0) {
+        chrome.action.setBadgeText({text: ""});
+        chrome.action.setBadgeBackgroundColor({color: "#ffffff"});
+    } else {
+        chrome.action.setBadgeText({text: notifs.toString()});
+        chrome.action.setBadgeBackgroundColor({color: "#ff0000"});
+    }
+}
+
+let notifs = 0;
+chrome.storage.local.get("changes", (result) => {
+    if (!result.changes) return;
+    for (let [id, [name, preview]] of Object.entries(result.changes)) {
+        if (preview) notifs += 1;
+    }
+    update_badge();
+})
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!sender.tab) {
@@ -143,6 +183,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         } else if (message.type == "update") {
             chrome.tabs.create({}, check_for_updates);
+
+        } else if (message.type == "delete") {
+            console.log(`Delete notification for course ${message.id}`);
+            delete_course_change(message.id);
         }
     } else {
         console.log("This is from tab");

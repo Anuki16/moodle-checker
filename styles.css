@@ -1,0 +1,22 @@
+body {
+    min-width: 200px;
+}
+
+.course {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.preview {
+    margin-top: 0;
+}
+
+.message {
+    background-color: rgb(219, 218, 218);
+    user-select: none;
+}
+
+.message:hover {
+    background-color: rgb(235, 233, 233);
+}
+
