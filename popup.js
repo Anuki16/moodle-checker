@@ -8,6 +8,11 @@ document.getElementById("update").addEventListener("click", () => {
     chrome.runtime.sendMessage({type: "update"});
 })
 
+document.getElementById("ignore").addEventListener("click", () => {
+    document.getElementById("notifs").innerHTML = "";
+    chrome.runtime.sendMessage({type: "deleteall"});
+})
+
 function open_message(id) {
     chrome.tabs.create({url: `https://online.uom.lk/course/view.php?id=${id}`});
     chrome.runtime.sendMessage({type: "delete", id: id});

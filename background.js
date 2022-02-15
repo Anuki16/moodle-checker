@@ -31,7 +31,7 @@ async function get_course_list() {
             } else {
                 let course_list = []
                 console.log(elem_list.length);
-                for (item of elem_list) {
+                for (let item of elem_list) {
                     course_list.push({
                         id: /id=(\d+)/.exec(item.getAttribute("href"))[1],
                         name: item.getElementsByClassName("multiline")[0].innerText.trim()
@@ -68,7 +68,7 @@ async function get_course_contents() {
                 setTimeout(wait_for_load, 50);
             } else {
                 let content_list = [];
-                for (item of elem_list) {
+                for (let item of elem_list) {
                     content_list.push(item.innerText.trim());
                 }
                 resolve(content_list);
@@ -81,21 +81,33 @@ async function get_course_contents() {
     return results;
 }
 
+let false_positives = ["Play Video", /[0-9]+ days ago/g];
+
+function compressed_string(string) {
+    let comp_string = string;
+    for (let item of false_positives) {
+        comp_string = string.replaceAll(item, "");
+    }
+    return comp_string.replaceAll(/[\n\t\s]+/g, "");
+}
+
 function compare_contents(prev, cur, course) {
     let change = "";
+    comp_strings = cur.map(compressed_string);
+
     if (prev[course.id]) {
         prev_contents = prev[course.id];
         for (let i = 0; i < cur.length; i++) {
-            if (cur[i] != prev_contents[i]) {
-                console.log(course.name, cur[i]);
+            if (comp_strings[i] != prev_contents[i]) {
+                console.log(course.name, comp_strings[i], prev_contents[i]);
                 change = cur[i].split('\n')[0]
                 break;
             }
         }
     }
-    let drop = randint(0, cur.length);
-    cur.splice(drop, Math.round(Math.random()));
-    chrome.storage.local.set({[course.id]: cur});
+    let drop = randint(0, comp_strings.length);
+    //comp_strings.splice(drop, Math.round(Math.random()));
+    chrome.storage.local.set({[course.id]: comp_strings});
 
     if (!change) return;
     chrome.storage.local.get("changes", (result) => {
@@ -132,7 +144,7 @@ async function check_for_updates(tab) {
     console.log(`I am at ${tab.id}`);
 
     chrome.storage.local.get("courses", async (result) => {
-        for (course of result.courses){
+        for (let course of result.courses){
             console.log(course.id, course.name);
             let wait_for_update = new Promise((resolve, reject) => {
                 chrome.tabs.update(tab.id, {url: `https://online.uom.lk/course/view.php?id=${course.id}`},
@@ -151,6 +163,17 @@ function delete_course_change(id) {
         chrome.storage.local.set({changes: result.changes});
     });
     notifs -= 1
+    update_badge();
+}
+
+function delete_all_changes() {
+    chrome.storage.local.get("changes", (result) => {
+        for (let id of Object.keys(result.changes)) {
+            result.changes[id][1] = "";
+        }
+        chrome.storage.local.set({changes: result.changes});
+    });
+    notifs = 0;
     update_badge();
 }
 
@@ -185,8 +208,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             chrome.tabs.create({}, check_for_updates);
 
         } else if (message.type == "delete") {
-            console.log(`Delete notification for course ${message.id}`);
             delete_course_change(message.id);
+        } else if (message.type == "deleteall") {
+            delete_all_changes();
         }
     } else {
         console.log("This is from tab");
