@@ -57,6 +57,13 @@ async function update_course_list(tab) {
     console.log(course_list);
     chrome.storage.local.set({courses: course_list});
     chrome.tabs.remove(tab.id);
+
+    chrome.windows.create({
+        url: "course_list.html",
+        type: "popup",
+        height: 400,
+        width: 400
+    });
 }
 
 async function get_course_contents() {
@@ -188,7 +195,12 @@ function update_badge() {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-    console.log("Installed");
+    chrome.storage.local.get("courses", (result) => {
+        if (result) return;
+        chrome.tabs.create({
+            url: "https://online.uom.lk/my/"
+        }, update_course_list);
+    });
 })
 
 let notifs = 0;
