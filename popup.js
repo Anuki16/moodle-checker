@@ -1,7 +1,13 @@
 
 
 document.getElementById("getcourses").addEventListener("click", () => {
-    chrome.runtime.sendMessage({type: "getcourses"});
+    //chrome.runtime.sendMessage({type: "getcourses"});
+    chrome.windows.create({
+        url: "course_list.html",
+        type: "popup",
+        height: 400,
+        width: 400
+    });
 })
 
 document.getElementById("update").addEventListener("click", () => {

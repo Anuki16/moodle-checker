@@ -86,7 +86,7 @@ let false_positives = ["Play Video", /[0-9]+ days ago/g];
 function compressed_string(string) {
     let comp_string = string;
     for (let item of false_positives) {
-        comp_string = string.replaceAll(item, "");
+        comp_string = comp_string.replaceAll(item, "");
     }
     return comp_string.replaceAll(/[\n\t\s]+/g, "");
 }
@@ -98,8 +98,8 @@ function compare_contents(prev, cur, course) {
     if (prev[course.id]) {
         prev_contents = prev[course.id];
         for (let i = 0; i < cur.length; i++) {
-            if (comp_strings[i] != prev_contents[i]) {
-                console.log(course.name, comp_strings[i], prev_contents[i]);
+            if (!prev_contents.includes(comp_strings[i])) {
+                console.log(course.name, comp_strings[i]);
                 change = cur[i].split('\n')[0]
                 break;
             }
@@ -186,6 +186,10 @@ function update_badge() {
         chrome.action.setBadgeBackgroundColor({color: "#ff0000"});
     }
 }
+
+chrome.runtime.onInstalled.addListener(() => {
+    console.log("Installed");
+})
 
 let notifs = 0;
 chrome.storage.local.get("changes", (result) => {
