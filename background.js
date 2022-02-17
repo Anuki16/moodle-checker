@@ -3,14 +3,14 @@ function randint(min, max) {
     return Math.floor(Math.random()*(max - min + 1)) + min;
 }
 
-function tab_loaded(tab_id) {
+function tab_loaded(tab_id, avoid = "chrome") {
     return new Promise((resolve, reject) => {
         const on_updated = (id, info) => {
             if (id == tab_id && info.status === "complete") {
                 chrome.tabs.get(id, (tab) => {
-                    if (!tab.url.includes("login")) {
+                    if (!tab.url.includes("login") && !tab.url.includes(avoid)) {
                         chrome.tabs.onUpdated.removeListener(on_updated);
-                         resolve();
+                        resolve();
                     }
                 });
             }
@@ -152,7 +152,8 @@ async function check_for_updates(window) {
 
     let tab = window.tabs[0];
     console.log(`I am at ${tab.id}`);
-
+    if (tab.status != "complete") await tab_loaded(tab.id, avoid = null);
+    
     chrome.storage.local.get("courses", async (result) => {
         for (let course of result.courses){
             console.log(course.id, course.name);
@@ -216,21 +217,20 @@ chrome.storage.local.get("changes", (result) => {
 })
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (!sender.tab) {
-        if (message.type == "getcourses") {
-            chrome.windows.create({
-                url: "https://online.uom.lk/my/"
-            }, update_course_list);
+    
+    if (message.type == "getcourses") {
+        chrome.windows.create({
+            url: "https://online.uom.lk/my/"
+        }, update_course_list);
 
-        } else if (message.type == "update") {
-            chrome.windows.create({}, check_for_updates);
+    } else if (message.type == "update") {
+        chrome.windows.create({}, check_for_updates);
 
-        } else if (message.type == "delete") {
-            delete_course_change(message.id);
-        } else if (message.type == "deleteall") {
-            delete_all_changes();
-        }
-    } else {
-        console.log("This is from tab");
+    } else if (message.type == "delete") {
+        delete_course_change(message.id);
+
+    } else if (message.type == "deleteall") {
+        delete_all_changes();
     }
-})
+
+});
