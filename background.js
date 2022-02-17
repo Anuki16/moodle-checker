@@ -46,8 +46,9 @@ async function get_course_list() {
     return results;
 }
 
-async function update_course_list(tab) {
+async function update_course_list(window) {
 
+    let tab = window.tabs[0];
     if (!tab.url) await tab_loaded(tab.id);
     let results = await chrome.scripting.executeScript({
         target: {tabId: tab.id},
@@ -147,7 +148,9 @@ async function check_course(tab, course, resolve) {
     resolve();
 }
 
-async function check_for_updates(tab) {
+async function check_for_updates(window) {
+
+    let tab = window.tabs[0];
     console.log(`I am at ${tab.id}`);
 
     chrome.storage.local.get("courses", async (result) => {
@@ -197,7 +200,7 @@ function update_badge() {
 chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.get("courses", (result) => {
         if (result) return;
-        chrome.tabs.create({
+        chrome.windows.create({
             url: "https://online.uom.lk/my/"
         }, update_course_list);
     });
@@ -215,13 +218,12 @@ chrome.storage.local.get("changes", (result) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!sender.tab) {
         if (message.type == "getcourses") {
-            chrome.tabs.create({
-                url: "https://online.uom.lk/my/",
-                active: true
+            chrome.windows.create({
+                url: "https://online.uom.lk/my/"
             }, update_course_list);
 
         } else if (message.type == "update") {
-            chrome.tabs.create({}, check_for_updates);
+            chrome.windows.create({}, check_for_updates);
 
         } else if (message.type == "delete") {
             delete_course_change(message.id);
