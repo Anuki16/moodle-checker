@@ -1,22 +1,35 @@
 body {
-    min-width: 200px;
+    min-width: 250px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 10pt;
+    color: rgb(44, 56, 80);
+    background-color: #cfd2d9;
 }
 
 .course {
     font-weight: bold;
-    margin-bottom: 0;
+    margin: 0;
 }
 
 .preview {
-    margin-top: 0;
+    margin: 0;
 }
 
 .message {
-    background-color: rgb(219, 218, 218);
+    background-color: rgb(246, 246, 248);
     user-select: none;
+    padding: 5px;
+    margin-bottom: 5px;
 }
 
 .message:hover {
-    background-color: rgb(235, 233, 233);
+    background-color: rgb(237, 237, 240);
 }
 
+button {
+    padding: 3px;
+    margin-bottom: 5px;
+    width: 100%;
+    font-family: inherit;
+    font-size: 12pt;
+}
