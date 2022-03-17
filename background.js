@@ -199,8 +199,9 @@ function update_badge() {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
+    console.log("Installed");
     chrome.storage.local.get("courses", (result) => {
-        if (result) return;
+        if (result.courses) return;
         chrome.windows.create({
             url: "https://online.uom.lk/my/"
         }, update_course_list);
