@@ -1,4 +1,9 @@
 
+
+let HEIGHT = 800;
+let WIDTH = 600;
+let LEFT = 800;
+
 function randint(min, max) {
     return Math.floor(Math.random()*(max - min + 1)) + min;
 }
@@ -203,7 +208,10 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.get("courses", (result) => {
         if (result.courses) return;
         chrome.windows.create({
-            url: "https://online.uom.lk/my/"
+            url: "https://online.uom.lk/my/",
+            height: HEIGHT,
+            width: WIDTH,
+            left: LEFT
         }, update_course_list);
     });
 })
@@ -221,11 +229,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     if (message.type == "getcourses") {
         chrome.windows.create({
-            url: "https://online.uom.lk/my/"
+            url: "https://online.uom.lk/my/",
+            height: HEIGHT,
+            width: WIDTH,
+            left: LEFT
         }, update_course_list);
 
     } else if (message.type == "update") {
-        chrome.windows.create({}, check_for_updates);
+        chrome.windows.create({
+            height: HEIGHT,
+            width: WIDTH,
+            left: LEFT
+        }, check_for_updates);
 
     } else if (message.type == "delete") {
         delete_course_change(message.id);
