@@ -16,6 +16,8 @@ function tab_loaded(tab_id, avoid = "chrome") {
                     if (!tab.url.includes("login") && !tab.url.includes(avoid)) {
                         chrome.tabs.onUpdated.removeListener(on_updated);
                         resolve();
+                    } else if (tab.url.includes("login")) {
+                        chrome.windows.update(tab.windowId, {drawAttention: true});
                     }
                 });
             }
@@ -39,7 +41,7 @@ async function get_course_list() {
                 for (let item of elem_list) {
                     course_list.push({
                         id: /id=(\d+)/.exec(item.getAttribute("href"))[1],
-                        name: item.getElementsByClassName("multiline")[0].innerText.trim()
+                        name: item.innerText.trim().split('\n').pop().trim()
                     });
                 }
                 resolve(course_list);
@@ -67,7 +69,7 @@ async function update_course_list(window) {
     chrome.windows.create({
         url: "course_list.html",
         type: "popup",
-        height: 400,
+        height: 600,
         width: 400
     });
 }
@@ -228,6 +230,7 @@ chrome.storage.local.get("changes", (result) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     if (message.type == "getcourses") {
+        console.log("Updating course list");
         chrome.windows.create({
             url: "https://online.uom.lk/my/",
             height: HEIGHT,
@@ -236,6 +239,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }, update_course_list);
 
     } else if (message.type == "update") {
+        console.log("Checking for updates");
         chrome.windows.create({
             height: HEIGHT,
             width: WIDTH,
