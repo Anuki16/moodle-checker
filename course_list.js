@@ -11,6 +11,7 @@ window.onload = () => {
 }
 
 document.getElementById("close").addEventListener("click", () => {
+    console.log("Sending message for update");
     chrome.runtime.sendMessage({type: "update"});
     chrome.windows.getCurrent((window) => {chrome.windows.remove(window.id)});
 });
