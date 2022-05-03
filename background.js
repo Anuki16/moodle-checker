@@ -75,11 +75,12 @@ async function update_course_list(window) {
 }
 
 async function get_course_contents() {
+    
     const got_contents = new Promise((resolve, reject) => {
         function wait_for_load() {
             let elem_list = document.getElementsByClassName("activity");
 
-            if (elem_list.length == 0) {
+            if (elem_list.length == 0 && document.readyState != "complete") {
                 setTimeout(wait_for_load, 50);
             } else {
                 let content_list = [];
@@ -148,6 +149,8 @@ async function check_course(tab, course, resolve) {
     });
     
     contents = results[0].result;
+    console.log(`${contents.length} items found`);
+    
     chrome.storage.local.get(course.id, (prev) => {
         compare_contents(prev, contents, course);
     });
