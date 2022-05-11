@@ -1,4 +1,4 @@
-
+"use strict";
 
 let HEIGHT = 800;
 let WIDTH = 600;
@@ -109,10 +109,12 @@ function compressed_string(string) {
 
 function compare_contents(prev, cur, course) {
     let change = "";
-    comp_strings = cur.map(compressed_string);
+    let comp_strings = cur.map(compressed_string);
 
     if (prev[course.id]) {
-        prev_contents = prev[course.id];
+        let prev_contents = prev[course.id];
+        console.log(`${course.id} : prev ${prev_contents.length} cur ${cur.length}`)
+
         for (let i = 0; i < cur.length; i++) {
             if (!prev_contents.includes(comp_strings[i])) {
                 console.log(course.name, comp_strings[i]);
@@ -148,7 +150,7 @@ async function check_course(tab, course, resolve) {
         function: get_course_contents
     });
     
-    contents = results[0].result;
+    let contents = results[0].result;
     console.log(`${contents.length} items found`);
     
     chrome.storage.local.get(course.id, (prev) => {
@@ -162,7 +164,7 @@ async function check_for_updates(window) {
 
     let tab = window.tabs[0];
     console.log(`I am at ${tab.id}`);
-    if (tab.status != "complete") await tab_loaded(tab.id, avoid = null);
+    if (tab.status != "complete") await tab_loaded(tab.id, null);
     
     chrome.storage.local.get("courses", async (result) => {
         for (let course of result.courses){
