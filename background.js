@@ -15,6 +15,7 @@ function tab_loaded(tab_id, avoid = "chrome") {
                 chrome.tabs.get(id, (tab) => {
                     if (!tab.url.includes("login") && !tab.url.includes(avoid)) {
                         chrome.tabs.onUpdated.removeListener(on_updated);
+                        console.log("tab loaded");
                         resolve();
                     } else if (tab.url.includes("login")) {
                         chrome.windows.update(tab.windowId, {drawAttention: true});
@@ -61,7 +62,7 @@ async function update_course_list(window) {
         target: {tabId: tab.id},
         function: get_course_list
     }); 
-    course_list = results[0].result;
+    let course_list = results[0].result;
     console.log(course_list);
     chrome.storage.local.set({courses: course_list});
     chrome.tabs.remove(tab.id);
@@ -97,7 +98,7 @@ async function get_course_contents() {
     return results;
 }
 
-let false_positives = ["Play Video", /[0-9]+ days ago/g];
+let false_positives = ["Play Video", /[0-9]+ (days|day|hours|hour) ago/g];
 
 function compressed_string(string) {
     let comp_string = string;
