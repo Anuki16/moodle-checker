@@ -14,8 +14,9 @@ document.getElementById("ignore").addEventListener("click", () => {
 })
 
 function open_message(id) {
-    chrome.tabs.create({url: `https://online.uom.lk/course/view.php?id=${id}`});
+    // After tab is created the popup may close. so execute other parts before that
     chrome.runtime.sendMessage({type: "delete", id: id});
+    chrome.tabs.create({url: `https://online.uom.lk/course/view.php?id=${id}`});
 }
 
 window.onload = () => {

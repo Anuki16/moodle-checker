@@ -186,7 +186,7 @@ function delete_course_change(id) {
         result.changes[id][1] = "";
         chrome.storage.local.set({changes: result.changes});
     });
-    notifs -= 1
+    notifs -= 1;
     update_badge();
 }
 
@@ -253,6 +253,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }, check_for_updates);
 
     } else if (message.type == "delete") {
+        console.log("Got delete message");
         delete_course_change(message.id);
 
     } else if (message.type == "deleteall") {
