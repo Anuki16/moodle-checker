@@ -216,10 +216,9 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.get("courses", (result) => {
         if (result.courses) return;
         chrome.windows.create({
-            url: "https://online.uom.lk/my/",
+            url: "https://online.uom.lk/my/courses.php",
             height: HEIGHT,
-            width: WIDTH,
-            left: LEFT
+            width: WIDTH
         }, update_course_list);
     });
 })
@@ -238,18 +237,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type == "getcourses") {
         console.log("Updating course list");
         chrome.windows.create({
-            url: "https://online.uom.lk/my/",
+            url: "https://online.uom.lk/my/courses.php",
             height: HEIGHT,
-            width: WIDTH,
-            left: LEFT
+            width: WIDTH
         }, update_course_list);
 
     } else if (message.type == "update") {
         console.log("Checking for updates");
         chrome.windows.create({
             height: HEIGHT,
-            width: WIDTH,
-            left: LEFT
+            width: WIDTH
         }, check_for_updates);
 
     } else if (message.type == "delete") {
