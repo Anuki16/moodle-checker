@@ -98,7 +98,7 @@ async function get_course_contents() {
     return results;
 }
 
-let false_positives = ["Play Video", /[0-9]+ (days|day|hours|hour) ago/g];
+let false_positives = ["Play Video", /[0-9]+ (days|day|hours|hour) ago/g, "Mark as done", "Done"];
 
 function compressed_string(string) {
     let comp_string = string;
